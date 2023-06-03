@@ -4,70 +4,59 @@ import nlp from 'compromise';
 
 nlp.extend(datePlugin);
 
-type MaskType = 'firstName' | 'lastName' | 'date' | 'organization' | 'money' | 'phoneNumber' | 'email' | 'time';
+type AnonymizeType = 'date' | 'email' | 'firstName' | 'lastName' | 'money' | 'organization' | 'phoneNumber' | 'times';
 
 export class AnonymizeNlp {
-  private maskMaps: Record<string, Record<string, string>> = {};
-  private readonly types: MaskType[];
+  private maskMaps: Record<string, Map<string, string>> = {};
+  private readonly typesToAnonymize: AnonymizeType[] = [];
 
-  constructor(private readonly typesToMask: MaskType[] | 'all' = 'all') {
-    if (typesToMask === 'all') {
-      this.types = ['firstName', 'lastName', 'date', 'organization', 'money', 'phoneNumber', 'email', 'time'];
-    } else {
-      this.types = typesToMask;
-    }
+  constructor(typesToAnonymize?: AnonymizeType[]) {
+    this.typesToAnonymize = typesToAnonymize ?? ['date', 'email', 'firstName', 'lastName', 'money', 'organization', 'phoneNumber', 'times'];
     this.setEmptyMaskMaps();
   }
 
   private setEmptyMaskMaps(): void {
-    this.maskMaps = {};
-    for (const type of this.types) {
-      this.maskMaps[type] = {};
-    }
+    this.typesToAnonymize.forEach((type) => {
+      this.maskMaps[type] = new Map<string, string>();
+    });
   }
 
   public anonymize(input: string): string {
     this.setEmptyMaskMaps();
     let output = input;
     const doc = nlp(input);
-    const replacements: any[] = [];
+    const people = doc.people().out('offset');
+    // @ts-expect-error
+    const times = doc.times().out('offset');
+    // @ts-expect-error
+    const dates = doc.dates().out('offset');
+    const organizations = doc.organizations().out('offset');
+    const money = doc.money().out('offset');
+    const phoneNumbers = doc.phoneNumbers().out('offset');
+    const emails = doc.emails().out('offset');
 
-    for (const type of this.types) {
-      let terms: any;
+    const peopleReplacementsArr = people.flatMap((person: any) =>
+      person.terms.map((term: any) => ({
+        ...term,
+        type: term.tags.includes('FirstName') ? 'firstName' : 'lastName',
+      })),
+    );
+    const dateReplacementsArr = dates.map((rep: any) => ({ ...rep, type: 'date' }));
+    const organizationReplacementsArr = organizations.map((org: any) => ({ ...org, type: 'organization' }));
+    const moneyReplacementsArr = money.map((mony: any) => ({ ...mony, type: 'money' }));
+    const phoneNumberReplacementsArr = phoneNumbers.map((phone: any) => ({ ...phone, type: 'phoneNumber' }));
+    const emailReplacementsArr = emails.map((email: any) => ({ ...email, type: 'email' }));
+    const timesReplacementsArr = times.map((time: any) => ({ ...time, type: 'times' }));
 
-      switch (type) {
-        case 'firstName':
-        case 'lastName':
-          terms = doc.people().out('offset');
-          break;
-        case 'date':
-          // @ts-expect-error
-          terms = doc.dates().out('offset');
-          break;
-        case 'organization':
-          terms = doc.organizations().out('offset');
-          break;
-        case 'money':
-          terms = doc.money().out('offset');
-          break;
-        case 'phoneNumber':
-          terms = doc.phoneNumbers().out('offset');
-          break;
-        case 'email':
-          terms = doc.emails().out('offset');
-          break;
-        case 'time':
-          // @ts-expect-error
-          terms = doc.times().out('offset');
-          break;
-        default:
-          throw new Error(`Unknown type: ${type}`);
-      }
-
-      const termsReplacementsArr = terms.map((term: any) => ({ ...term, type }));
-      replacements.push(...termsReplacementsArr);
-    }
-
+    const replacements = [
+      ...peopleReplacementsArr,
+      ...dateReplacementsArr,
+      ...organizationReplacementsArr,
+      ...moneyReplacementsArr,
+      ...phoneNumberReplacementsArr,
+      ...emailReplacementsArr,
+      ...timesReplacementsArr,
+    ];
     replacements.sort((a, b) => a.offset.start - b.offset.start);
     replacements.forEach((rep) => {
       const { text, type } = rep;
@@ -79,22 +68,21 @@ export class AnonymizeNlp {
 
   public deAnonymize(input: string): string {
     let deAnonymizedInput = input;
-    this.types.forEach((type) => {
-      for (const key in this.maskMaps[type]) {
-        deAnonymizedInput = deAnonymizedInput.split(this.maskMaps[type][key]).join(key);
-      }
+    ['firstName', 'lastName', 'date', 'organization', 'money', 'phoneNumber', 'email'].forEach((type) => {
+      this.maskMaps[type].forEach((key: string, value: string) => {
+        deAnonymizedInput = deAnonymizedInput.split(key).join(value);
+      });
     });
-    this.setEmptyMaskMaps();
     return deAnonymizedInput;
   }
 
-  private mask(text: string, type: MaskType): string {
-    if (!this.maskMaps[type][text]) {
-      const size = Object.keys(this.maskMaps[type]).length;
+  private mask(text: string, type: string): string {
+    if (!this.maskMaps[type].has(text)) {
+      const { size } = this.maskMaps[type];
       const maskedValue = `<${type.toUpperCase()}${size > 0 ? size : ''}>`;
-      this.maskMaps[type][text] = maskedValue;
+      this.maskMaps[type].set(text, maskedValue);
     }
 
-    return this.maskMaps[type][text];
+    return this.maskMaps[type].get(text) as string;
   }
 }
