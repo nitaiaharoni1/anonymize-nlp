@@ -1,7 +1,7 @@
 import { AnonymizeNlp } from './AnonymizeNlp';
 
 describe('AnonymizeNlp', () => {
-  const anonymizeNlp = new AnonymizeNlp([]);
+  const anonymizeNlp = new AnonymizeNlp();
 
   test('should encrypt and decrypt a string', () => {
     const input = 'John Doe will be 30 on 2024-06-10.';

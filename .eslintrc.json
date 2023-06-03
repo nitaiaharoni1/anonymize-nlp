@@ -86,6 +86,7 @@
         ]
       }
     ],
+    "no-nested-ternary": "off",
     "guard-for-in": "off",
     "@typescript-eslint/ban-ts-comment": "off",
     "@typescript-eslint/consistent-type-imports": "off",
