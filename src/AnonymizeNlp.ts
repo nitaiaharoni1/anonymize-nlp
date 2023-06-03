@@ -1,16 +1,18 @@
 // @ts-expect-error
 import datePlugin from 'compromise-dates';
 import nlp from 'compromise';
+import numbersPlugin from 'compromise-numbers';
 
 nlp.extend(datePlugin);
+nlp.extend(numbersPlugin);
 
-type AnonymizeType = 'date' | 'email' | 'firstName' | 'lastName' | 'money' | 'organization' | 'phoneNumber' | 'times';
+type AnonymizeType = 'date' | 'email' | 'firstName' | 'lastName' | 'money' | 'organization' | 'phoneNumber' | 'times' | 'numbers';
 
 export class AnonymizeNlp {
   private maskMaps: Record<string, Map<string, string>> = {};
   private readonly typesToAnonymize: AnonymizeType[];
 
-  constructor(typesToAnonymize: AnonymizeType[] = ['date', 'email', 'firstName', 'lastName', 'money', 'organization', 'phoneNumber', 'times']) {
+  constructor(typesToAnonymize: AnonymizeType[] = ['date', 'email', 'firstName', 'lastName', 'money', 'organization', 'phoneNumber', 'times', 'numbers']) {
     this.typesToAnonymize = typesToAnonymize;
     this.setEmptyMaskMaps();
   }
@@ -28,6 +30,7 @@ export class AnonymizeNlp {
     const money = doc.money().out('offset');
     const phoneNumbers = doc.phoneNumbers().out('offset');
     const emails = doc.emails().out('offset');
+    // const numbers = doc.numbers().out('offset');
 
     const allTypes = [
       { arr: emails, type: 'email' },
@@ -38,6 +41,7 @@ export class AnonymizeNlp {
       { arr: times, type: 'times' },
       { arr: dates, type: 'date' },
       { arr: money, type: 'money' },
+      // { arr: numbers, type: 'numbers' },
     ];
 
     const replacements = allTypes

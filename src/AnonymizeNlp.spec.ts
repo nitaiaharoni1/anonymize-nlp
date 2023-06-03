@@ -104,4 +104,20 @@ describe('AnonymizeNlp', () => {
     const deAnonymized = anonymizeNlp2.deAnonymize(anonymized);
     expect(deAnonymized).toEqual(input);
   });
+
+  test('should anonymize credit card numbers', () => {
+    const input = "John's credit card number is 4111-1111-1111-1111";
+    const anonymized = anonymizeNlp.anonymize(input);
+    expect(anonymized).toEqual("John's credit card number is <MONEY>");
+    const deAnonymized = anonymizeNlp.deAnonymize(anonymized);
+    expect(deAnonymized).toEqual(input);
+  });
+
+  test('should anonymize multiple credit card numbers', () => {
+    const input = "John's credit card numbers are 4111-1111-1111-1111 and 5500-0000-0000-0004";
+    const anonymized = anonymizeNlp.anonymize(input);
+    expect(anonymized).toEqual("John's credit card numbers are <MONEY> and <MONEY1>");
+    const deAnonymized = anonymizeNlp.deAnonymize(anonymized);
+    expect(deAnonymized).toEqual(input);
+  });
 });
