@@ -50,4 +50,58 @@ describe('AnonymizeNlp', () => {
     const deAnonymized = anonymizeNlp.deAnonymize(anonymized);
     expect(deAnonymized).toEqual(input);
   });
+
+  test('should handle empty input string', () => {
+    const input = '';
+    const anonymized = anonymizeNlp.anonymize(input);
+    expect(anonymized).toEqual('');
+    const deAnonymized = anonymizeNlp.deAnonymize(anonymized);
+    expect(deAnonymized).toEqual(input);
+  });
+
+  test('should handle multiple matches of the same type', () => {
+    const input = 'John Doe has phone numbers 123-456-7890 and 098-765-4321';
+    const anonymized = anonymizeNlp.anonymize(input);
+    expect(anonymized).toEqual('<FIRSTNAME> <LASTNAME> has phone numbers <PHONENUMBER> and <PHONENUMBER1>');
+    const deAnonymized = anonymizeNlp.deAnonymize(anonymized);
+    expect(deAnonymized).toEqual(input);
+  });
+
+  test('should anonymize times', () => {
+    const input = "John's meeting is at 3pm.";
+    const anonymized = anonymizeNlp.anonymize(input);
+    expect(anonymized).toEqual('<FIRSTNAME> meeting is <TIMES>');
+    const deAnonymized = anonymizeNlp.deAnonymize(anonymized);
+    expect(deAnonymized).toEqual(input);
+  });
+
+  test('should anonymize only specific types', () => {
+    const anonymizeNlp = new AnonymizeNlp(['firstName', 'lastName']);
+    const input = 'John Doe will be 30 on 2024-06-10.';
+    const anonymized = anonymizeNlp.anonymize(input);
+    // The '30' and '2024-06-10' remain as they are since only firstName and lastName are to be anonymized.
+    expect(anonymized).toEqual('<FIRSTNAME> <LASTNAME> will be 30 on 2024-06-10.');
+    const deAnonymized = anonymizeNlp.deAnonymize(anonymized);
+    expect(deAnonymized).toEqual(input);
+  });
+
+  test('should anonymize only specific types - 2', () => {
+    const anonymizeNlp1 = new AnonymizeNlp(['email']);
+    const input = "John's email is john.doe@gmail.com";
+    const anonymized = anonymizeNlp1.anonymize(input);
+    // The 'John' remains as it is since only email is to be anonymized.
+    expect(anonymized).toEqual("John's email is <EMAIL>");
+    const deAnonymized = anonymizeNlp1.deAnonymize(anonymized);
+    expect(deAnonymized).toEqual(input);
+  });
+
+  test('should not anonymize any type', () => {
+    const anonymizeNlp2 = new AnonymizeNlp([]);
+    const input = 'John Doe will be 30 on 2024-06-10.';
+    const anonymized = anonymizeNlp2.anonymize(input);
+    // The input remains as it is since no types are to be anonymized.
+    expect(anonymized).toEqual(input);
+    const deAnonymized = anonymizeNlp2.deAnonymize(anonymized);
+    expect(deAnonymized).toEqual(input);
+  });
 });

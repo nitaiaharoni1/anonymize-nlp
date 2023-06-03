@@ -15,12 +15,6 @@ export class AnonymizeNlp {
     this.setEmptyMaskMaps();
   }
 
-  private setEmptyMaskMaps(): void {
-    this.typesToAnonymize.forEach((type) => {
-      this.maskMaps[type] = new Map<string, string>();
-    });
-  }
-
   public anonymize(input: string): string {
     this.setEmptyMaskMaps();
     let output = input;
@@ -36,14 +30,14 @@ export class AnonymizeNlp {
     const emails = doc.emails().out('offset');
 
     const allTypes = [
-      { arr: people, tag: 'FirstName', type: 'firstName' },
-      { arr: people, tag: 'LastName', type: 'lastName' },
-      { arr: dates, type: 'date' },
-      { arr: organizations, type: 'organization' },
-      { arr: money, type: 'money' },
-      { arr: phoneNumbers, type: 'phoneNumber' },
       { arr: emails, type: 'email' },
+      { arr: phoneNumbers, type: 'phoneNumber' },
+      { arr: organizations, type: 'organization' },
+      { arr: people, tag: 'LastName', type: 'lastName' },
+      { arr: people, tag: 'FirstName', type: 'firstName' },
       { arr: times, type: 'times' },
+      { arr: dates, type: 'date' },
+      { arr: money, type: 'money' },
     ];
 
     const replacements = allTypes
@@ -79,7 +73,14 @@ export class AnonymizeNlp {
         deAnonymizedInput = deAnonymizedInput.split(key).join(value);
       });
     });
+    this.setEmptyMaskMaps();
     return deAnonymizedInput;
+  }
+
+  private setEmptyMaskMaps(): void {
+    this.typesToAnonymize.forEach((type) => {
+      this.maskMaps[type] = new Map<string, string>();
+    });
   }
 
   private mask(text: string, type: string): string {
