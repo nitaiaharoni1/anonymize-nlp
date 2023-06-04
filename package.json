@@ -1,6 +1,6 @@
 {
   "name": "anonymize-nlp",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Anonymize-NLP is a lightweight and robust package for text anonymization. It uses Natural Language Processing (NLP) and Regular Expressions (Regex) to identify and mask sensitive information in a string.,",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
