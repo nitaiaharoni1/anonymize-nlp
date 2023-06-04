@@ -20,9 +20,9 @@ npm i anonymize-nlp
 ## Usage
 
 ```javascript
-import { AnonymizeNlp, AnonymizeType } from 'anonymizenlp';
+import { AnonymizeNlp } from 'anonymizenlp';
 
-const anonymizer = new AnonymizeNlp([AnonymizeType.EMAIL, AnonymizeType.PHONE_NUMBER]);
+const anonymizer = new AnonymizeNlp(['email', 'phonenumber']);
 const anonymizedText = anonymizer.anonymize('My email is john@example.com and my phone number is +1-234-567-8900.');
 
 console.log(anonymizedText);
