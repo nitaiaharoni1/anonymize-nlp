@@ -1,120 +1,83 @@
-# Vector Storage
+# AnonymizeNLP
 
-Vector Storage is a lightweight and efficient vector database that stores document vectors in the browser's IndexedDB. This package allows you to perform semantic similarity searches on text documents using vector embeddings. Semantic search refers to the ability to understand the meaning and context of text documents and queries, enabling more accurate and relevant search results. Vector Storage leverages OpenAI embeddings to convert text documents into vectors and provides an interface for searching similar documents based on cosine similarity.
+Anonymize-NLP is a lightweight and robust package for text anonymization. It uses Natural Language Processing (NLP) and Regular Expressions (Regex) to identify and mask sensitive information in a string.
 
 ## Features
 
-- Store and manage document vectors in IndexedDB
-- Perform similarity searches on text documents
-- Filter search results based on metadata or text content
-- Automatically manage storage size and remove least recently used documents when space limit is reached
-
-## Cosine Similarity Algorithm
-
-Cosine similarity is a measure of similarity between two non-zero vectors in an inner product space. It is defined as
-the cosine of the angle between the two vectors. The cosine similarity value ranges from -1 to 1, where 1 indicates
-complete similarity, 0 indicates no similarity, and -1 indicates complete dissimilarity.
-
-In this package, cosine similarity is used to measure the similarity between document vectors and the query vector. The
-cosine similarity score is calculated using the dot product of the vectors, divided by the product of their magnitudes.
-
-## LRU Mechanism
-
-The Least Recently Used (LRU) mechanism is used to manage the storage size and automatically remove documents when the storage size exceeds the specified limit. Documents are sorted by their hit counter (ascending) and then by their timestamp (ascending). Documents with the lowest hit count and oldest timestamps are removed first until the storage size is below the limit.
+- Anonymize specific categories in a text, including emails, monetary values, organizations, people, and phone numbers and more.
+- Customizable anonymization: Specify which categories to anonymize and which to exclude.
+- De-anonymization: Revert anonymized text back to its original form.
+- Built-in compatibility with nlp NER - compromise and compromise-numbers plugins.
 
 ## Installation
 
-Install the package using npm:
+Install Anonymize-NLP and its peer dependencies with npm.
 
 ```bash
-npm i vector-storage
+npm i anonymize-nlp
 ```
 
 ## Usage
 
-Here is a basic example of how to use the VectorStorage class:
-
 ```javascript
-import { VectorStorage } from "vector-storage";
+import { AnonymizeNlp, AnonymizeType } from 'anonymizenlp';
 
-// Create an instance of VectorStorage
-const vectorStore = new VectorStorage({ openAIApiKey: "your-openai-api-key" });
+const anonymizer = new AnonymizeNlp([AnonymizeType.EMAIL, AnonymizeType.PHONE_NUMBER]);
+const anonymizedText = anonymizer.anonymize('My email is john@example.com and my phone number is +1-234-567-8900.');
 
-// Add a text document to the store
-await vectorStore.addText("The quick brown fox jumps over the lazy dog.", {
-  category: "example",
-});
+console.log(anonymizedText);
+// Output: "My email is <EMAIL> and my phone number is <PHONENUMBER>."
 
-// Perform a similarity search
-const results = await vectorStore.similaritySearch({
-  query: "A fast fox leaps over a sleepy hound.",
-});
-
-// Display the search results
-console.log(results);
+const originalText = anonymizer.deAnonymize(anonymizedText);
+console.log(originalText);
+// Output: "My email is john@example.com and my phone number is +1-234-567-8900."
 ```
 
-## API
+## AnonymizeNlp API
 
-### VectorStorage
+### Create a new AnonymizeNlp instance. 
+By default, all types are anonymized.
 
-The main class for managing document vectors in IndexedDB.
+`constructor(typesToAnonymize: AnonymizeType[] = anonymizeTypeOptions, typesToExclude: AnonymizeType[] = [])`
 
-#### constructor(options: IVSOptions)
 
-Creates a new instance of VectorStorage.
-
-**options**: An object containing the following properties:
+- `typesToAnonymize`: Array of `AnonymizeType` that you want to anonymize in the text.
+- `typesToExclude`: Array of `AnonymizeType` that you want to exclude from anonymization.
 
 ```typescript
-interface IVSOptions {
-  openAIApiKey: string; // The OpenAI API key used for generating embeddings.
-  maxSizeInMB?: number; // The maximum size of the storage in megabytes. Defaults to 2GB
-  debounceTime?: number; // The debounce time in milliseconds for saving to IndexedDB. Defaults to 0.
-  openaiModel?: string; // The OpenAI model used for generating embeddings. Defaults to 'text-embedding-ada-002'.
-}
+type AnonymizeType =
+  | 'date'
+  | 'email'
+  | 'firstname'
+  | 'lastname'
+  | 'money'
+  | 'organization'
+  | 'phonenumber'
+  | 'time'
+  | 'creditcard'
+  | 'domain'
+  | 'ip'
+  | 'token'
+  | 'url'
+  | 'id'
+  | 'zip_code'
+  | 'crypto'
+  | 'apikey';
 ```
 
-### addText(text: string, metadata: object): Promise<IVSDocument>
+### anonymize(input: string): string
 
-Adds a text document to the store and returns the created document.
+Anonymizes the specified categories in the given text.
 
-- **text**: The text content of the document.
-- **metadata**: An object containing metadata associated with the document.
+- `input`: The text to be anonymized.
 
-### addTexts(texts: string[], metadatas: object[]): Promise<IVSDocument[]>
+### deAnonymize(input: string): string
 
-Adds multiple text documents to the store and returns an array of created documents.
+Reverts the anonymized text back to its original form.
 
-- **texts**: An array of text contents for the documents.
-- **metadatas**: An array of metadata objects associated with the documents.
+- `input`: The anonymized text.
 
-### similaritySearch(params: ISimilaritySearchParams): Promise<IVSDocument[]>
-
-Performs a similarity search on the stored documents and returns an array of matching documents.
-
-**params**: An object containing the following properties:
-
-- **query**: The query text or vector for the search.
-- **k** (optional): The number of top results to return (default: 4).
-- **filterOptions** (optional): An object specifying filter criteria for the search.
-
-### IVSDocument Interface
-
-The IVSDocument interface represents a document object stored in the vector database. It contains the following properties:
-
-```typescript
-interface IVSDocument {
-  hits?: number; // The number of hits (accesses) for the document. Omit if the value is 0.
-  metadata: object; // The metadata associated with the document for filtering.
-  text: string; // The text content of the document.
-  timestamp: number; // The timestamp indicating when the document was added to the store.
-  vectorMag: number; // The magnitude of the document vector.
-  vector: number[]; // The vector representation of the document.
-}
-```
-
-## Contributing
+# Contributing
 
 Contributions to this project are welcome! If you would like to contribute, please follow these steps:
 
@@ -127,8 +90,8 @@ Contributions to this project are welcome! If you would like to contribute, plea
 
 Please ensure that your code follows the project's coding style and that all tests pass before submitting a pull request. If you find any bugs or have suggestions for improvements, feel free to open an issue on GitHub.
 
-## License
+# License
 
 This project is licensed under the MIT License. See the LICENSE file for the full license text.
 
-Copyright (c) Nitai Aharoni. All rights reserved.
+Copyright (c) 2023. All rights reserved.

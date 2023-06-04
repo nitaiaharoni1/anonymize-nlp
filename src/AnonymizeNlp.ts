@@ -1,5 +1,4 @@
-import { AnonymizeType, anonymizeTypeOptions } from './types/AnonymizeType';
-import { regexPatterns } from './common/regexPatterns';
+import { AnonymizeType, anonymizeTypeOptions, regexPatterns } from './common/regexPatterns';
 import { uniqBy } from 'lodash';
 import nlp from 'compromise';
 import numbersPlugin from 'compromise-numbers';
