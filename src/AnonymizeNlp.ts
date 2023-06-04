@@ -16,8 +16,9 @@ export class AnonymizeNlp {
   private maskMaps: Record<string, Map<string, string>> = {};
   private readonly typesToAnonymize: AnonymizeType[];
 
-  constructor(typesToAnonymize: AnonymizeType[] = anonymizeTypeOptions) {
-    this.typesToAnonymize = typesToAnonymize;
+  constructor(typesToAnonymize: AnonymizeType[] = anonymizeTypeOptions, typesToExclude: AnonymizeType[] = []) {
+    const typesToAnonymizeWithoutExcluded = typesToAnonymize.filter((type) => !typesToExclude.includes(type));
+    this.typesToAnonymize = typesToAnonymizeWithoutExcluded;
     this.setEmptyMaskMaps();
   }
 

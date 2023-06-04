@@ -50,10 +50,15 @@ export const regexPatterns = [
   },
   { key: 'uk_nin', regex: '\\b[A-CEGHJ-PR-TW-Z][A-CEGHJ-NPR-TW-Z]\\s?\\d{2}\\s?\\d{2}\\s?\\d{2}\\s?[A-D]\\b' },
   { key: 'url', regex: '\\b((http|https):\\/\\/)?[-a-zA-Z0-9@:%._\\+~#=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%_\\+.~#?&//=]*)' },
-  { key: 'zip_code', regex: '\\b[0-9]{5}(?:-[0-9]{4})?\\b' },
+  { key: 'ip', regex: '\\b(?:[A-Fa-f0-9]{1,4}:){7}[A-Fa-f0-9]{1,4}\\b' },
   { key: 'phonenumber', regex: '\\b\\(?[2-9][0-8][0-9]\\)?[-. ]?[2-9][0-9]{2}[-. ]?[0-9]{4}\\b' },
-  { key: 'uuid', regex: '\\b[0-9a-f]{8}\\-[0-9a-f]{4}\\-4[0-9a-f]{3}\\-[89ab][0-9a-f]{3}\\-[0-9a-f]{12}\\b' },
+  { key: 'uuid', regex: '\\b[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\\b' },
   { key: 'us_social_security', regex: '\\b\\d{3}-\\d{2}-\\d{4}\\b' },
-  { key: 'isbn', regex: '\\b(?:ISBN(?:-13)?:?\\ )?(?=[0-9]{13}$|(?=(?:[0-9]+[- ]){4})[- 0-9]{17}$)97[89][- ]?[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9]\\b' },
+  {
+    key: 'isbn',
+    regex: '\\b(?:ISBN(?:-13)?:? )?(?=[0-9]{13}$|(?=(?:[0-9]+[- ]){4})[- 0-9]{17}$)97[89][- ]?[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9]\\b',
+  },
+  { key: 'zip_code', regex: '\\b[0-9]{5}(?:-[0-9]{4})?\\b' },
 ];
+
 export const regexesKeys = regexPatterns.map((pattern) => pattern.key) as AnonymizeType[];
