@@ -1,10 +1,9 @@
+import { AnonymizeType, anonymizeTypeOptions } from './types/AnonymizeType';
+import { regexPatterns } from './common/regexPatterns';
 import { uniqBy } from 'lodash';
-// @ts-expect-error
-import datePlugin from 'compromise-dates';
 import nlp from 'compromise';
 import numbersPlugin from 'compromise-numbers';
 
-nlp.extend(datePlugin);
 nlp.extend(numbersPlugin);
 
 interface IDocTerm {
@@ -13,13 +12,11 @@ interface IDocTerm {
   start: number;
 }
 
-type AnonymizeType = 'date' | 'email' | 'firstname' | 'lastname' | 'money' | 'organization' | 'phonenumber' | 'time' | 'numbers';
-
 export class AnonymizeNlp {
   private maskMaps: Record<string, Map<string, string>> = {};
   private readonly typesToAnonymize: AnonymizeType[];
 
-  constructor(typesToAnonymize: AnonymizeType[] = ['date', 'email', 'firstname', 'lastname', 'money', 'organization', 'phonenumber', 'time', 'numbers']) {
+  constructor(typesToAnonymize: AnonymizeType[] = anonymizeTypeOptions) {
     this.typesToAnonymize = typesToAnonymize;
     this.setEmptyMaskMaps();
   }
@@ -54,31 +51,13 @@ export class AnonymizeNlp {
   }
 
   private getTerms(doc: any): any[] {
-    return [
-      ...doc.dates().out('offset'),
-      ...doc.emails().out('offset'),
-      ...doc.money().out('offset'),
-      ...doc.organizations().out('offset'),
-      ...doc.people().out('offset'),
-      ...doc.phoneNumbers().out('offset'),
-      ...doc.times().out('offset'),
-    ];
+    return [...doc.emails().out('offset'), ...doc.money().out('offset'), ...doc.organizations().out('offset'), ...doc.people().out('offset'), ...doc.phoneNumbers().out('offset')];
   }
 
   private createDocTermsFromTerms(processedTerms: IDocTerm[], docObject: any, term: any): IDocTerm[] {
     const reversedTags = term.tags.reverse();
     const foundTag = reversedTags.find((tag: string) => this.typesToAnonymize.includes(tag.toLowerCase() as any));
-    let { text } = term;
-    if (foundTag === 'Date') {
-      processedTerms.push({ start: docObject.offset.start, tag: 'Date', text: docObject.text });
-      // eslint-disable-next-line prefer-destructuring
-      text = docObject.text;
-    }
-    if (foundTag === 'Time') {
-      processedTerms.push({ start: docObject.offset.start, tag: 'Time', text: docObject.text });
-      // eslint-disable-next-line prefer-destructuring
-      text = docObject.text;
-    }
+    const { text } = term;
     if (foundTag) {
       processedTerms.push({ start: docObject.offset.start, tag: foundTag, text });
     }
@@ -99,6 +78,12 @@ export class AnonymizeNlp {
 
   private processDoc(input: string): IDocTerm[] {
     let processedTerms: IDocTerm[] = [];
+    processedTerms = this.processTerms(input, processedTerms);
+    processedTerms = this.processWithRegex(input, processedTerms);
+    return this.createUniqueAndSortedTerms(processedTerms);
+  }
+
+  private processTerms(input: string, processedTerms: IDocTerm[]): IDocTerm[] {
     const doc = nlp(input);
     const processedDoc = this.getTerms(doc);
 
@@ -109,7 +94,25 @@ export class AnonymizeNlp {
       });
     });
 
-    return this.createUniqueAndSortedTerms(processedTerms);
+    return processedTerms;
+  }
+
+  private processWithRegex(input: string, processedTerms: IDocTerm[]): IDocTerm[] {
+    const filteredRegexPatterns = regexPatterns.filter((ptrn) => this.typesToAnonymize.includes(ptrn.key as any));
+    filteredRegexPatterns.forEach((ptrn) => {
+      const { regex, key } = ptrn;
+      let match;
+      const rx = new RegExp(regex, 'gu');
+      while ((match = rx.exec(input)) !== null) {
+        processedTerms.push({
+          start: match.index,
+          tag: key,
+          text: match[0],
+        });
+      }
+    });
+
+    return processedTerms;
   }
 
   private setEmptyMaskMaps(): void {

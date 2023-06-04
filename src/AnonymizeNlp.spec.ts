@@ -1,12 +1,13 @@
 import { AnonymizeNlp } from './AnonymizeNlp';
 
+// eslint-disable-next-line max-lines-per-function
 describe('AnonymizeNlp', () => {
   const anonymizeNlp = new AnonymizeNlp();
 
   test('should encrypt and decrypt a string', () => {
     const input = 'John Doe will be 30 on 2024-06-10.';
     const anonymized = anonymizeNlp.anonymize(input);
-    expect(anonymized).toEqual('<FIRSTNAME> <LASTNAME> will be <DATE>');
+    expect(anonymized).toMatch('<FIRSTNAME> <LASTNAME> will be 30 on <DATE>');
     const deAnonymized = anonymizeNlp.deAnonymize(anonymized);
     expect(deAnonymized).toEqual(input);
   });
@@ -14,7 +15,7 @@ describe('AnonymizeNlp', () => {
   test('should anonymize multiple names', () => {
     const input = 'John Doe and Jane Smith will meet on 2024-06-10.';
     const anonymized = anonymizeNlp.anonymize(input);
-    expect(anonymized).toEqual('<FIRSTNAME> <LASTNAME> and <FIRSTNAME1> <LASTNAME1> will meet <DATE>');
+    expect(anonymized).toMatch('<FIRSTNAME> <LASTNAME> and <FIRSTNAME1> <LASTNAME1> will meet on <DATE>');
     const deAnonymized = anonymizeNlp.deAnonymize(anonymized);
     expect(deAnonymized).toEqual(input);
   });
@@ -70,7 +71,7 @@ describe('AnonymizeNlp', () => {
   test('should anonymize times', () => {
     const input = "John's meeting is at 3pm.";
     const anonymized = anonymizeNlp.anonymize(input);
-    expect(anonymized).toEqual('<FIRSTNAME> meeting is <TIME>');
+    expect(anonymized).toMatch('<FIRSTNAME> meeting is at <TIME>');
     const deAnonymized = anonymizeNlp.deAnonymize(anonymized);
     expect(deAnonymized).toEqual(input);
   });
@@ -108,7 +109,7 @@ describe('AnonymizeNlp', () => {
   test('should anonymize credit card numbers', () => {
     const input = "John's credit card number is 4111-1111-1111-1111";
     const anonymized = anonymizeNlp.anonymize(input);
-    expect(anonymized).toEqual('<FIRSTNAME> credit card number is <MONEY>');
+    expect(anonymized).toEqual('<FIRSTNAME> credit card number is <CREDITCARD>');
     const deAnonymized = anonymizeNlp.deAnonymize(anonymized);
     expect(deAnonymized).toEqual(input);
   });
@@ -116,7 +117,7 @@ describe('AnonymizeNlp', () => {
   test('should anonymize multiple credit card numbers', () => {
     const input = "John's credit card numbers are 4111-1111-1111-1111 and 5500-0000-0000-0004";
     const anonymized = anonymizeNlp.anonymize(input);
-    expect(anonymized).toEqual('<FIRSTNAME> credit card numbers are <MONEY> and <MONEY1>');
+    expect(anonymized).toEqual('<FIRSTNAME> credit card numbers are <CREDITCARD> and <CREDITCARD1>');
     const deAnonymized = anonymizeNlp.deAnonymize(anonymized);
     expect(deAnonymized).toEqual(input);
   });

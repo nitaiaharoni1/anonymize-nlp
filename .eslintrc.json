@@ -87,6 +87,7 @@
       }
     ],
     "no-shadow": "off",
+    "no-param-reassign": "off",
     "no-nested-ternary": "off",
     "guard-for-in": "off",
     "@typescript-eslint/ban-ts-comment": "off",
