@@ -27,7 +27,7 @@ export const regexPatterns = [
   { key: 'date', regex: '\\b(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\\b' },
   { key: 'dl', regex: '\\b([A-Za-z]{1,2}\\s{0,1})?\\d{5,6}\\b' },
   { key: 'domain', regex: '\\b((?!-)[A-Za-z0-9-]{1,63}(?<!-)\\.)+[A-Za-z]{2,6}\\b' },
-  { key: 'guid', regex: '\\b[A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-4[A-Fa-f0-9]{3}-[89ABab][A-Fa-f0-9]{3}-[A-Fa-f0-9]{12}\\b' },
+  { key: 'uuid', regex: '\\b[A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-4[A-Fa-f0-9]{3}-[89ABab][A-Fa-f0-9]{3}-[A-Fa-f0-9]{12}\\b' },
   { key: 'ip', regex: '\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b' },
   { key: 'ip', regex: '\\b(?:[A-Fa-f0-9]{1,4}:){7}[A-Fa-f0-9]{1,4}\\b' },
   { key: 'token', regex: '\\beyJ[0-9a-zA-Z_\\-]*\\.[0-9a-zA-Z_\\-]*\\.[0-9a-zA-Z_\\-]*\\b' },
@@ -51,6 +51,9 @@ export const regexPatterns = [
   { key: 'uk_nin', regex: '\\b[A-CEGHJ-PR-TW-Z][A-CEGHJ-NPR-TW-Z]\\s?\\d{2}\\s?\\d{2}\\s?\\d{2}\\s?[A-D]\\b' },
   { key: 'url', regex: '\\b((http|https):\\/\\/)?[-a-zA-Z0-9@:%._\\+~#=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%_\\+.~#?&//=]*)' },
   { key: 'zip_code', regex: '\\b[0-9]{5}(?:-[0-9]{4})?\\b' },
+  { key: 'phonenumber', regex: '\\b\\(?[2-9][0-8][0-9]\\)?[-. ]?[2-9][0-9]{2}[-. ]?[0-9]{4}\\b' },
+  { key: 'uuid', regex: '\\b[0-9a-f]{8}\\-[0-9a-f]{4}\\-4[0-9a-f]{3}\\-[89ab][0-9a-f]{3}\\-[0-9a-f]{12}\\b' },
+  { key: 'us_social_security', regex: '\\b\\d{3}-\\d{2}-\\d{4}\\b' },
+  { key: 'isbn', regex: '\\b(?:ISBN(?:-13)?:?\\ )?(?=[0-9]{13}$|(?=(?:[0-9]+[- ]){4})[- 0-9]{17}$)97[89][- ]?[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9]\\b' },
 ];
-
 export const regexesKeys = regexPatterns.map((pattern) => pattern.key) as AnonymizeType[];
