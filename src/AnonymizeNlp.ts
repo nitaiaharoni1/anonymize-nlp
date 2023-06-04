@@ -53,42 +53,39 @@ export class AnonymizeNlp {
     return outputRes;
   }
 
-  private processDoc(input: string): IDocTerm[] {
-    const processedTerms: IDocTerm[] = [];
-    const doc = nlp(input);
-    const processedDoc = [
-      // @ts-expect-error
+  private getTerms(doc: any): any[] {
+    return [
       ...doc.dates().out('offset'),
       ...doc.emails().out('offset'),
       ...doc.money().out('offset'),
       ...doc.organizations().out('offset'),
       ...doc.people().out('offset'),
       ...doc.phoneNumbers().out('offset'),
-      // @ts-expect-error
       ...doc.times().out('offset'),
     ];
-    // sort by offset start and then by text length
-    processedDoc.forEach((docObject) => {
-      const { terms } = docObject;
-      terms.forEach((term: any) => {
-        const reversedTags = term.tags.reverse();
-        const foundTag = reversedTags.find((tag: string) => this.typesToAnonymize.includes(tag.toLowerCase() as any));
-        let { text } = term;
-        if (foundTag === 'Date') {
-          processedTerms.push({ start: docObject.offset.start, tag: 'Date', text: docObject.text });
-          // eslint-disable-next-line prefer-destructuring
-          text = docObject.text;
-        }
-        if (foundTag === 'Time') {
-          processedTerms.push({ start: docObject.offset.start, tag: 'Time', text: docObject.text });
-          // eslint-disable-next-line prefer-destructuring
-          text = docObject.text;
-        }
-        if (foundTag) {
-          processedTerms.push({ start: docObject.offset.start, tag: foundTag, text });
-        }
-      });
-    });
+  }
+
+  private createDocTermsFromTerms(processedTerms: IDocTerm[], docObject: any, term: any): IDocTerm[] {
+    const reversedTags = term.tags.reverse();
+    const foundTag = reversedTags.find((tag: string) => this.typesToAnonymize.includes(tag.toLowerCase() as any));
+    let { text } = term;
+    if (foundTag === 'Date') {
+      processedTerms.push({ start: docObject.offset.start, tag: 'Date', text: docObject.text });
+      // eslint-disable-next-line prefer-destructuring
+      text = docObject.text;
+    }
+    if (foundTag === 'Time') {
+      processedTerms.push({ start: docObject.offset.start, tag: 'Time', text: docObject.text });
+      // eslint-disable-next-line prefer-destructuring
+      text = docObject.text;
+    }
+    if (foundTag) {
+      processedTerms.push({ start: docObject.offset.start, tag: foundTag, text });
+    }
+    return processedTerms;
+  }
+
+  private createUniqueAndSortedTerms(processedTerms: IDocTerm[]): IDocTerm[] {
     const uniqueProcessedTerms = uniqBy(processedTerms, (term) => term.text + term.start + term.tag);
     const sortedProcessedDocTerms = uniqueProcessedTerms.sort((a, b) => {
       const startDiff = a.start - b.start;
@@ -98,6 +95,21 @@ export class AnonymizeNlp {
       return b.text.length - a.text.length;
     });
     return sortedProcessedDocTerms;
+  }
+
+  private processDoc(input: string): IDocTerm[] {
+    let processedTerms: IDocTerm[] = [];
+    const doc = nlp(input);
+    const processedDoc = this.getTerms(doc);
+
+    processedDoc.forEach((docObject) => {
+      const { terms } = docObject;
+      terms.forEach((term: any) => {
+        processedTerms = this.createDocTermsFromTerms(processedTerms, docObject, term);
+      });
+    });
+
+    return this.createUniqueAndSortedTerms(processedTerms);
   }
 
   private setEmptyMaskMaps(): void {
