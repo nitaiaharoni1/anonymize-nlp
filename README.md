@@ -7,7 +7,7 @@ Anonymize-NLP is a lightweight and robust package for text anonymization. It use
 - Anonymize specific categories in a text, including emails, monetary values, organizations, people, and phone numbers and more.
 - Customizable anonymization: Specify which categories to anonymize and which to exclude.
 - De-anonymization: Revert anonymized text back to its original form.
-- Built-in compatibility with nlp NER - compromise and compromise-numbers plugins.
+- Built-in compatibility with nlp NER - compromise.
 
 ## Installation
 

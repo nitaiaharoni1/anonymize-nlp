@@ -1,9 +1,5 @@
 import { AnonymizeType, anonymizeTypeOptions, regexPatterns } from './common/regexPatterns';
-import { uniqBy } from 'lodash';
 import nlp from 'compromise';
-import numbersPlugin from 'compromise-numbers';
-
-nlp.extend(numbersPlugin);
 
 interface IDocTerm {
   text: string;
@@ -65,7 +61,11 @@ export class AnonymizeNlp {
   }
 
   private createUniqueAndSortedTerms(processedTerms: IDocTerm[]): IDocTerm[] {
-    const uniqueProcessedTerms = uniqBy(processedTerms, (term) => term.text + term.start + term.tag);
+    const uniqueProcessedTerms = Array.from(
+      processedTerms.reduce((map, term) => {
+        return map.set(term.text + term.start + term.tag, term);
+      }, new Map()).values(),
+    );
     const sortedProcessedDocTerms = uniqueProcessedTerms.sort((a, b) => {
       const startDiff = a.start - b.start;
       if (startDiff !== 0) {
