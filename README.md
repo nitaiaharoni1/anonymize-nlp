@@ -22,7 +22,7 @@ npm i anonymize-nlp
 ```javascript
 import { AnonymizeNlp } from 'anonymizenlp';
 
-const anonymizer = new AnonymizeNlp(['email', 'phonenumber']);
+const anonymizer = new AnonymizeNlp();
 const anonymizedText = anonymizer.anonymize('My email is john@example.com and my phone number is +1-234-567-8900.');
 
 console.log(anonymizedText);
