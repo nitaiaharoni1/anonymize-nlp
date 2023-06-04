@@ -61,11 +61,7 @@ export class AnonymizeNlp {
   }
 
   private createUniqueAndSortedTerms(processedTerms: IDocTerm[]): IDocTerm[] {
-    const uniqueProcessedTerms = Array.from(
-      processedTerms.reduce((map, term) => {
-        return map.set(term.text + term.start + term.tag, term);
-      }, new Map()).values(),
-    );
+    const uniqueProcessedTerms = Array.from(processedTerms.reduce((map, term) => map.set(term.text + term.start + term.tag, term), new Map()).values());
     const sortedProcessedDocTerms = uniqueProcessedTerms.sort((a, b) => {
       const startDiff = a.start - b.start;
       if (startDiff !== 0) {
