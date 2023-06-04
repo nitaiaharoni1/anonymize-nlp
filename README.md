@@ -33,7 +33,7 @@ console.log(originalText);
 // Output: "My email is john@example.com and my phone number is +1-234-567-8900."
 ```
 
-## AnonymizeNlp API
+## API
 
 ### Create a new AnonymizeNlp instance. 
 By default, all types are anonymized.
@@ -77,7 +77,7 @@ Reverts the anonymized text back to its original form.
 
 - `input`: The anonymized text.
 
-# Contributing
+## Contributing
 
 Contributions to this project are welcome! If you would like to contribute, please follow these steps:
 
@@ -90,7 +90,7 @@ Contributions to this project are welcome! If you would like to contribute, plea
 
 Please ensure that your code follows the project's coding style and that all tests pass before submitting a pull request. If you find any bugs or have suggestions for improvements, feel free to open an issue on GitHub.
 
-# License
+## License
 
 This project is licensed under the MIT License. See the LICENSE file for the full license text.
 
