@@ -22,7 +22,8 @@
     "compromise": "^14.9.0",
     "compromise-dates": "^3.4.1",
     "compromise-numbers": "^1.4.0",
-    "crypto": "^1.0.1"
+    "crypto": "^1.0.1",
+    "lodash": "^4.17.21"
   },
   "devDependencies": {
     "@types/jest": "^29.5.2",

@@ -1,3 +1,4 @@
+import { uniqBy } from 'lodash';
 // @ts-expect-error
 import datePlugin from 'compromise-dates';
 import nlp from 'compromise';
@@ -6,13 +7,19 @@ import numbersPlugin from 'compromise-numbers';
 nlp.extend(datePlugin);
 nlp.extend(numbersPlugin);
 
-type AnonymizeType = 'date' | 'email' | 'firstName' | 'lastName' | 'money' | 'organization' | 'phoneNumber' | 'times' | 'numbers';
+interface IDocTerm {
+  text: string;
+  tag: string;
+  start: number;
+}
+
+type AnonymizeType = 'date' | 'email' | 'firstname' | 'lastname' | 'money' | 'organization' | 'phonenumber' | 'time' | 'numbers';
 
 export class AnonymizeNlp {
   private maskMaps: Record<string, Map<string, string>> = {};
   private readonly typesToAnonymize: AnonymizeType[];
 
-  constructor(typesToAnonymize: AnonymizeType[] = ['date', 'email', 'firstName', 'lastName', 'money', 'organization', 'phoneNumber', 'times', 'numbers']) {
+  constructor(typesToAnonymize: AnonymizeType[] = ['date', 'email', 'firstname', 'lastname', 'money', 'organization', 'phonenumber', 'time', 'numbers']) {
     this.typesToAnonymize = typesToAnonymize;
     this.setEmptyMaskMaps();
   }
@@ -20,53 +27,8 @@ export class AnonymizeNlp {
   public anonymize(input: string): string {
     this.setEmptyMaskMaps();
     let output = input;
-    const doc = nlp(input);
-    const people = doc.people().out('offset');
-    // @ts-expect-error
-    const times = doc.times().out('offset');
-    // @ts-expect-error
-    const dates = doc.dates().out('offset');
-    const organizations = doc.organizations().out('offset');
-    const money = doc.money().out('offset');
-    const phoneNumbers = doc.phoneNumbers().out('offset');
-    const emails = doc.emails().out('offset');
-    // const numbers = doc.numbers().out('offset');
-
-    const allTypes = [
-      { arr: emails, type: 'email' },
-      { arr: phoneNumbers, type: 'phoneNumber' },
-      { arr: organizations, type: 'organization' },
-      { arr: people, tag: 'LastName', type: 'lastName' },
-      { arr: people, tag: 'FirstName', type: 'firstName' },
-      { arr: times, type: 'times' },
-      { arr: dates, type: 'date' },
-      { arr: money, type: 'money' },
-      // { arr: numbers, type: 'numbers' },
-    ];
-
-    const replacements = allTypes
-      .filter(({ type }) => this.typesToAnonymize.includes(type as AnonymizeType))
-      .flatMap(({ arr, tag, type }) =>
-        arr.flatMap((obj: any) => {
-          // TODO: Fix this
-          if (type === 'date' || !tag) {
-            return { ...obj, type };
-          }
-          return obj.terms.map((term: any) => ({
-            ...term,
-            type: tag ? (term.tags.includes(tag) ? type : null) : type,
-          }));
-        }),
-      )
-      .filter((rep) => Boolean(rep.type));
-
-    replacements.sort((a, b) => a.offset.start - b.offset.start);
-
-    replacements.forEach((rep) => {
-      const { text, type } = rep;
-      const mask = this.mask(text, type);
-      output = output.replace(text, mask);
-    });
+    const docTerms = this.processDoc(input);
+    output = this.replaceWithMasks(docTerms, output);
     return output;
   }
 
@@ -81,19 +43,78 @@ export class AnonymizeNlp {
     return deAnonymizedInput;
   }
 
+  private replaceWithMasks(docTerms: IDocTerm[], output: string): string {
+    let outputRes = output;
+    docTerms.forEach((term) => {
+      const { text, tag } = term;
+      const mask = this.mask(text, tag);
+      outputRes = outputRes.replace(text, mask);
+    });
+    return outputRes;
+  }
+
+  private processDoc(input: string): IDocTerm[] {
+    const processedTerms: IDocTerm[] = [];
+    const doc = nlp(input);
+    const processedDoc = [
+      // @ts-expect-error
+      ...doc.dates().out('offset'),
+      ...doc.emails().out('offset'),
+      ...doc.money().out('offset'),
+      ...doc.organizations().out('offset'),
+      ...doc.people().out('offset'),
+      ...doc.phoneNumbers().out('offset'),
+      // @ts-expect-error
+      ...doc.times().out('offset'),
+    ];
+    // sort by offset start and then by text length
+    processedDoc.forEach((docObject) => {
+      const { terms } = docObject;
+      terms.forEach((term: any) => {
+        const reversedTags = term.tags.reverse();
+        const foundTag = reversedTags.find((tag: string) => this.typesToAnonymize.includes(tag.toLowerCase() as any));
+        let { text } = term;
+        if (foundTag === 'Date') {
+          processedTerms.push({ start: docObject.offset.start, tag: 'Date', text: docObject.text });
+          // eslint-disable-next-line prefer-destructuring
+          text = docObject.text;
+        }
+        if (foundTag === 'Time') {
+          processedTerms.push({ start: docObject.offset.start, tag: 'Time', text: docObject.text });
+          // eslint-disable-next-line prefer-destructuring
+          text = docObject.text;
+        }
+        if (foundTag) {
+          processedTerms.push({ start: docObject.offset.start, tag: foundTag, text });
+        }
+      });
+    });
+    const uniqueProcessedTerms = uniqBy(processedTerms, (term) => term.text + term.start + term.tag);
+    const sortedProcessedDocTerms = uniqueProcessedTerms.sort((a, b) => {
+      const startDiff = a.start - b.start;
+      if (startDiff !== 0) {
+        return startDiff;
+      }
+      return b.text.length - a.text.length;
+    });
+    return sortedProcessedDocTerms;
+  }
+
   private setEmptyMaskMaps(): void {
     this.typesToAnonymize.forEach((type) => {
       this.maskMaps[type] = new Map<string, string>();
     });
   }
 
-  private mask(text: string, type: string): string {
-    if (!this.maskMaps[type].has(text)) {
-      const { size } = this.maskMaps[type];
-      const maskedValue = `<${type.toUpperCase()}${size > 0 ? size : ''}>`;
-      this.maskMaps[type].set(text, maskedValue);
+  private mask(text: string, tag: string): string {
+    const lowerCaseTag = tag.toLowerCase();
+    if (!this.maskMaps[lowerCaseTag]) {
+      this.maskMaps[lowerCaseTag] = new Map<string, string>();
     }
+    const { size } = this.maskMaps[lowerCaseTag];
+    const maskedValue = `<${tag.toUpperCase()}${size > 0 ? size : ''}>`;
+    this.maskMaps[lowerCaseTag].set(text, maskedValue);
 
-    return this.maskMaps[type].get(text) as string;
+    return this.maskMaps[lowerCaseTag].get(text) as string;
   }
 }

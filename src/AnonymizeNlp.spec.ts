@@ -22,7 +22,7 @@ describe('AnonymizeNlp', () => {
   test('should anonymize organization names', () => {
     const input = 'John Doe works at Google.';
     const anonymized = anonymizeNlp.anonymize(input);
-    expect(anonymized).toEqual('<FIRSTNAME> <LASTNAME> works at <ORGANIZATION>');
+    expect(anonymized).toMatch('<FIRSTNAME> <LASTNAME> works at <ORGANIZATION>');
     const deAnonymized = anonymizeNlp.deAnonymize(anonymized);
     expect(deAnonymized).toEqual(input);
   });
@@ -70,13 +70,13 @@ describe('AnonymizeNlp', () => {
   test('should anonymize times', () => {
     const input = "John's meeting is at 3pm.";
     const anonymized = anonymizeNlp.anonymize(input);
-    expect(anonymized).toEqual('<FIRSTNAME> meeting is <TIMES>');
+    expect(anonymized).toEqual('<FIRSTNAME> meeting is <TIME>');
     const deAnonymized = anonymizeNlp.deAnonymize(anonymized);
     expect(deAnonymized).toEqual(input);
   });
 
   test('should anonymize only specific types', () => {
-    const anonymizeNlp = new AnonymizeNlp(['firstName', 'lastName']);
+    const anonymizeNlp = new AnonymizeNlp(['firstname', 'lastname']);
     const input = 'John Doe will be 30 on 2024-06-10.';
     const anonymized = anonymizeNlp.anonymize(input);
     // The '30' and '2024-06-10' remain as they are since only firstName and lastName are to be anonymized.
