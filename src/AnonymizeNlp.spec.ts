@@ -139,4 +139,12 @@ Please remember that all the information provided, including the credit card num
     const deAnonymized = anonymizeNlp.deAnonymize(anonymized);
     expect(deAnonymized).toEqual(input);
   });
+
+  test('should anonymize email and phone number', () => {
+    const input = 'My email is john@example.com and my phone number is +1-234-567-8900.';
+    const anonymized = anonymizeNlp.anonymize(input);
+    expect(anonymized).toEqual('My email is <EMAIL> and my phone number is <PHONENUMBER>.');
+    const deAnonymized = anonymizeNlp.deAnonymize(anonymized);
+    expect(deAnonymized).toEqual(input);
+  });
 });
