@@ -102,7 +102,7 @@ export class AnonymizeNlp {
     filteredRegexPatterns.forEach((ptrn) => {
       const { regex, key } = ptrn;
       let match;
-      const rx = new RegExp(regex, 'gu');
+      const rx = new RegExp(regex, 'igu');
       while ((match = rx.exec(input)) !== null) {
         processedTerms.push({
           start: match.index,

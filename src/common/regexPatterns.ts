@@ -34,6 +34,8 @@ export const regexPatterns = [
   { key: 'mac_address', regex: '\\b([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})\\b' },
   { key: 'passport', regex: '\\b\\d{9}\\b' },
   { key: 'date', regex: '\\b(today|yesterday|tomorrow|last\\s+night|last\\s+week|next\\s+week)\\b' },
+  { key: 'date', regex: '\\b(January|February|March|April|May|June|July|August|September|October|November|December)\\s\\d{1,2},\\s\\d{4}\\b' },
+  { key: 'phonenumber', regex: '\\+\\d+\\s\\(\\d{3}\\)\\s\\d{3}-\\d{4}' },
   { key: 'routing', regex: '\\b\\d{9}\\b' },
   { key: 'token', regex: '\\bxox[baprs]-[0-9a-zA-Z]{10,48}\\b' },
   { key: 'ssn', regex: '\\b\\d{3}-\\d{2}-\\d{4}\\b' },
