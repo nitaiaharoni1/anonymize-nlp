@@ -23,14 +23,14 @@ npm i anonymize-nlp
 import { AnonymizeNlp } from 'anonymizenlp';
 
 const anonymizer = new AnonymizeNlp();
-const anonymizedText = anonymizer.anonymize('My email is john@example.com and my phone number is +1-234-567-8900.');
+const anonymizedText = anonymizer.anonymize(`Hi i'm John Doe, my email is john@example.com and my phone number is +1-234-567-8900.`);
 
 console.log(anonymizedText);
-// Output: "My email is <EMAIL> and my phone number is <PHONENUMBER>."
+// Output: "Hi i'm <FIRSTNAME> <LASTNAME>, my email is <EMAIL> and my phone number is <PHONENUMBER>."
 
 const originalText = anonymizer.deAnonymize(anonymizedText);
 console.log(originalText);
-// Output: "My email is john@example.com and my phone number is +1-234-567-8900."
+// Output: "Hi i'm John Doe, my email is john@example.com and my phone number is +1-234-567-8900."
 ```
 
 ## API
