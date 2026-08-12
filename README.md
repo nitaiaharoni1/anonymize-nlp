@@ -95,3 +95,7 @@ Please ensure that your code follows the project's coding style and that all tes
 This project is licensed under the MIT License. See the LICENSE file for the full license text.
 
 Copyright (c) 2023. All rights reserved.
+
+---
+
+Built by [Nitai Aharoni](https://nitaiaharoni.com), who builds AI systems, backends and infrastructure end to end. Available for freelance projects and part-time CTO work: **[nitaiaharoni.com](https://nitaiaharoni.com)**
